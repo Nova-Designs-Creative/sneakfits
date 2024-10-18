@@ -33,17 +33,11 @@ export default function Home() {
               Sneakfits
             </Link>
             <nav className="hidden md:flex space-x-4">
-              <Link href="#" className="hover:underline">
+              <Link href="/" className="hover:underline">
                 Home
               </Link>
-              <Link href="#" className="hover:underline">
+              <Link href="/store" className="hover:underline">
                 Shop
-              </Link>
-              <Link href="#" className="hover:underline">
-                About
-              </Link>
-              <Link href="#" className="hover:underline">
-                Contact
               </Link>
             </nav>
             <div className="hidden md:flex space-x-2">
@@ -66,15 +60,10 @@ export default function Home() {
               <Link href="#" className="hover:underline">
                 Home
               </Link>
-              <Link href="#" className="hover:underline">
+              <Link href="/store" className="hover:underline">
                 Shop
               </Link>
-              <Link href="#" className="hover:underline">
-                About
-              </Link>
-              <Link href="#" className="hover:underline">
-                Contact
-              </Link>
+
               <Link href="/auth/signIn">
                 <Button className="w-full text-white">Sign In</Button>
               </Link>
