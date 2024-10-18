@@ -73,7 +73,7 @@ export default function Dashboard() {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [dateRangeText, setDateRangeText] = useState("");
-  const itemsPerPage = 5;
+  const itemsPerPage = 40;
   const [showAlert, setShowAlert] = useState(false);
 
   const router = useRouter();

@@ -44,7 +44,7 @@ export default function Component() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredShoes, setFilteredShoes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(40);
   const [sortColumn, setSortColumn] = useState("id");
   const [sortDirection, setSortDirection] = useState("asc");
   const [selectedTab, setSelectedTab] = useState("available"); // New state for selected tab
