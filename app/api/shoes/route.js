@@ -2,29 +2,13 @@ import connectMongoDB from "@/libs/mongodb";
 import Shoes from "@/models/shoesSchema";
 import { NextResponse } from "next/server";
 
-const SECRET_KEY = process.env.NEXTAUTH_SECRET;
-
-function checkSecretKey(request) {
-  const apiKey = request.headers.get("x-api-key");
-  return apiKey === SECRET_KEY;
-}
-
 export async function GET(request) {
-  // Added request as a parameter
-  if (!checkSecretKey(request)) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
   await connectMongoDB();
   const shoes = await Shoes.find();
   return NextResponse.json(shoes);
 }
 
 export async function POST(request) {
-  if (!checkSecretKey(request)) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
   const {
     shoeImage,
     shoeId,
