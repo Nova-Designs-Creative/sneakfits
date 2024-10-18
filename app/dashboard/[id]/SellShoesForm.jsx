@@ -144,7 +144,7 @@ const ShoeSellingForm = ({
         },
       };
 
-      const response = await fetch(`http://localhost:3000/api/shoes/${id}`, {
+      const response = await fetch(`https://sneakfits.vercel.app/api/shoes/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

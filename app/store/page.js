@@ -29,7 +29,7 @@ const ShoeStore = () => {
   useEffect(() => {
     const fetchShoesData = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/shoes", {
+        const response = await fetch("https://sneakfits.vercel.app/api/shoes", {
           method: "GET",
           headers: {
             "x-api-key": process.env.NEXT_PUBLIC_AUTH_SECRET, // Include your API key here

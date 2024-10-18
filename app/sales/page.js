@@ -73,7 +73,7 @@ export default function SalesAnalyticsDashboard() {
   }, [status, router]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/shoes", {
+    fetch("https://sneakfits.vercel.app/api/shoes", {
       method: "GET",
       headers: {
         "x-api-key": process.env.NEXT_PUBLIC_AUTH_SECRET,

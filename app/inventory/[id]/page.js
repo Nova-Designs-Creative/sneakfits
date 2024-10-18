@@ -4,7 +4,7 @@ import UpdateProductDashboard from "./UpdateShoesForm";
 // we got the id from the api route params
 const getShoesById = async (id) => {
   try {
-    const res = await fetch(`http://localhost:3000/api/shoes/${id}`, {
+    const res = await fetch(`https://sneakfits.vercel.app/api/shoes/${id}`, {
       cache: "no-store",
     });
 

@@ -54,7 +54,7 @@ export default function Component() {
   }, [status, router]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/shoes", {
+    fetch("https://sneakfits.vercel.app/api/shoes", {
       method: "GET",
       headers: {
         "x-api-key": process.env.NEXT_PUBLIC_AUTH_SECRET,
@@ -136,7 +136,7 @@ export default function Component() {
   };
 
   const onReturn = (selectedShoe) => {
-    fetch(`http://localhost:3000/api/shoes?id=${selectedShoe._id}`, {
+    fetch(`https://sneakfits.vercel.app/api/shoes?id=${selectedShoe._id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

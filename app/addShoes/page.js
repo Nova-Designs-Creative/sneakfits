@@ -292,7 +292,7 @@ export default function CreateProductDashboard() {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/api/shoes", {
+      const response = await fetch("https://sneakfits.vercel.app/api/shoes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
