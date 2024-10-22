@@ -15,7 +15,7 @@ import { MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
-const ShoesRow = ({ shoesRowData, onDelete, isLoading }) => {
+const ShoesRow = ({ shoesRowData, onDelete, isLoading, onDuplicate }) => {
   // Function to render availability badge
   const renderAvailabilityBadge = () => {
     switch (shoesRowData?.availability) {
@@ -86,6 +86,9 @@ const ShoesRow = ({ shoesRowData, onDelete, isLoading }) => {
                     <DropdownMenuItem>Edit</DropdownMenuItem>
                   </Link>
                 )}
+                <DropdownMenuItem onClick={() => onDuplicate(shoesRowData)}>
+                  Duplicate
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onDelete(shoesRowData)}>
                   Delete
                 </DropdownMenuItem>

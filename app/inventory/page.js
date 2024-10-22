@@ -44,11 +44,12 @@ export default function Component() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredShoes, setFilteredShoes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(40);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
   const [sortColumn, setSortColumn] = useState("id");
   const [sortDirection, setSortDirection] = useState("asc");
   const [selectedTab, setSelectedTab] = useState("available"); // New state for selected tab
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [selectedShoe, setSelectedShoe] = useState(null);
   const [missingStoreShoes, setMissingStoreShoes] = useState([]);
   const [showAlert, setShowAlert] = useState(false); // New state to handle alert
@@ -188,6 +189,16 @@ export default function Component() {
     setSelectedShoe(null);
   };
 
+  const openDuplicateModal = (shoe) => {
+    setShowDuplicateModal(true);
+    setSelectedShoe(shoe);
+  };
+
+  const closeDuplicateModal = () => {
+    setShowDuplicateModal(false);
+    setSelectedShoe(null);
+  };
+
   const onDelete = (selectedShoe) => {
     fetch(`https://sneakfits.vercel.app/api/shoes?id=${selectedShoe._id}`, {
       method: "DELETE",
@@ -200,6 +211,46 @@ export default function Component() {
       })
 
       .catch((error) => console.error("Error deleting shoe:", error));
+  };
+
+  const onDuplicate = async (selectedShoe) => {
+    const shoeData = {
+      shoeImage: selectedShoe.shoeImage,
+      shoeId: selectedShoe.shoeId,
+      sku: selectedShoe.sku,
+      name: selectedShoe.name,
+      size: selectedShoe.size,
+      price: selectedShoe.price,
+      priceSale: selectedShoe.priceSale,
+      owner: selectedShoe.owner,
+      location: selectedShoe.location,
+      brand: selectedShoe.brand,
+      availability: "available",
+    };
+
+    try {
+      const response = await fetch("https://sneakfits.vercel.app/api/shoes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.NEXT_PUBLIC_AUTH_SECRET,
+        },
+
+        body: JSON.stringify(shoeData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create shoe");
+      }
+
+      const result = await response.json();
+      setShowDuplicateModal(false);
+      location.reload();
+    } catch (error) {
+      console.error("Error creating shoe:", error);
+    }
+
+    console.log("Duplicated shoe:", selectedShoe);
   };
 
   return (
@@ -396,6 +447,7 @@ export default function Component() {
                               key={shoe.shoeId}
                               shoesRowData={shoe}
                               onDelete={() => openDeleteModal(shoe)}
+                              onDuplicate={() => openDuplicateModal(shoe)}
                             />
                           ))
                         )}
@@ -476,6 +528,59 @@ export default function Component() {
                     onClick={() => onDelete(selectedShoe)}
                   >
                     Delete
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          )}
+
+          {showDuplicateModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <Card className="w-[350px] mt-5">
+                <CardHeader>
+                  <CardTitle>Duplicate Shoe</CardTitle>
+                  <CardDescription>
+                    Are you sure you want to duplicate this shoe?
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid w-full items-center gap-4">
+                    <div className="flex flex-col space-y-1.5">
+                      <Label>Shoe Id</Label>
+                      <Input value={selectedShoe?.shoeId} disabled />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label>Name</Label>
+                      <Input value={selectedShoe?.name} disabled />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label>SKU</Label>
+                      <Input value={selectedShoe?.sku} disabled />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label>Owner</Label>
+                      <Input value={selectedShoe?.owner} disabled />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label>Location</Label>
+                      <Input value={selectedShoe?.location} disabled />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label>Availability</Label>
+                      <Input value={selectedShoe?.availability} disabled />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={closeDuplicateModal}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    className="bg-blue-500"
+                    onClick={() => onDuplicate(selectedShoe)}
+                  >
+                    Submit
                   </Button>
                 </CardFooter>
               </Card>
