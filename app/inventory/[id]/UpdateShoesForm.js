@@ -55,8 +55,6 @@ function ShoeCombobox({
     try {
       const result = await api.searchProducts(searchTerm, { limit: 20 });
 
-      
-
       const lowerCaseSearchTerm = searchTerm.toLowerCase();
       const searchTerms = lowerCaseSearchTerm.split(" ");
 
@@ -75,7 +73,6 @@ function ShoeCombobox({
           return 0;
         });
 
-     
       setProducts(filteredAndSortedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -293,7 +290,7 @@ export default function CreateProductDashboard({
 
     const shoeData = {
       newShoeImage: newShoeImage,
-      newShoeId: "F" + newShoeId,
+      newShoeId: newShoeId,
       newSku: newSku,
       newName: selectedShoe,
       newSize: newSelectedSize,
@@ -305,20 +302,23 @@ export default function CreateProductDashboard({
     };
 
     try {
-      const response = await fetch(`https://sneakfits.vercel.app/api/shoes/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(shoeData),
-      });
+      const response = await fetch(
+        `https://sneakfits.vercel.app/api/shoes/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(shoeData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create shoe");
       }
 
       const result = await response.json();
-     
+
       setSuccess(true);
       router.push("/inventory");
     } catch (error) {
