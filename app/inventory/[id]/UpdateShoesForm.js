@@ -338,7 +338,9 @@ export default function CreateProductDashboard({
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto bg-card rounded-lg shadow-lg p-6 space-y-8">
-          <h1 className="text-3xl font-bold text-center">Create New Product</h1>
+          <h1 className="text-3xl font-bold text-center">
+            Updating {selectedShoe}
+          </h1>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="image" className="text-lg font-medium">
@@ -511,12 +513,12 @@ export default function CreateProductDashboard({
                 </Button>
               </Link>
               <Button className="text-white" type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Shoes"}
+                {loading ? "Updating..." : "Update Shoes"}
               </Button>
             </div>
             {error && <p className="text-red-500">{error}</p>}
             {success && (
-              <p className="text-green-500">Shoe created successfully!</p>
+              <p className="text-green-500">Shoe updated successfully!</p>
             )}
           </form>
         </div>
