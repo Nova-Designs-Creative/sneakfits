@@ -457,7 +457,6 @@ export default function CreateProductDashboard() {
                       placeholder="Enter SKU"
                       value={sku}
                       onChange={(e) => setSku(e.target.value)}
-                      readOnly
                     />
                   </div>
                   <div className="space-y-2">
