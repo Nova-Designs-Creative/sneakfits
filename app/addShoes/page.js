@@ -33,122 +33,181 @@ import Navbar from "../components/Navbar";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-function ShoeCombobox({ value, setValue, setShoeImage, setSku, setBrand }) {
+function ShoeCombobox({
+  value,
+  setValue,
+  setShoeImage,
+  setSku,
+  setBrand,
+  externalSku,
+}) {
   const [open, setOpen] = useState(false);
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("Jordan 1");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isDebouncing, setIsDebouncing] = useState(false);
+  const [searchType, setSearchType] = useState("name");
 
   const fetchProducts = useCallback(async () => {
-    if (searchTerm.length < 3) {
+    const currentSearchTerm = searchType === "sku" ? externalSku : searchTerm;
+
+    console.log("Fetching products with:", {
+      searchTerm: currentSearchTerm,
+      searchType,
+      externalSku,
+    });
+
+    if (searchType === "name" && currentSearchTerm.length < 3) {
+      console.log("Search term too short, clearing products");
       setProducts([]);
       return;
     }
+
+    if (searchType === "sku" && !currentSearchTerm) {
+      console.log("No SKU provided, clearing products");
+      setProducts([]);
+      return;
+    }
+
     setIsSearching(true);
     const api = new StockXAPI(StockXLocation.US);
-    try {
-      const result = await api.searchProducts(searchTerm, { limit: 20 });
 
-      const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      const searchTerms = lowerCaseSearchTerm.split(" ");
+    try {
+      const result = await api.searchProducts(currentSearchTerm, { limit: 20 });
+      console.log("API response:", result);
 
       const filteredAndSortedProducts = result.hits
         .filter((product) => {
-          const title = product.title.toLowerCase();
-          return searchTerms.some((term) => title.includes(term));
+          if (searchType === "sku") {
+            return product.sku
+              .toLowerCase()
+              .includes(currentSearchTerm.toLowerCase());
+          } else {
+            const title = product.title.toLowerCase();
+            const terms = currentSearchTerm.toLowerCase().split(" ");
+            return terms.some((term) => title.includes(term));
+          }
         })
         .sort((a, b) => {
-          const aTitle = a.title.toLowerCase();
-          const bTitle = b.title.toLowerCase();
-          const aExactMatch = aTitle === lowerCaseSearchTerm;
-          const bExactMatch = bTitle === lowerCaseSearchTerm;
-          if (aExactMatch && !bExactMatch) return -1;
-          if (!aExactMatch && bExactMatch) return 1;
+          if (searchType === "sku") {
+            const aExactMatch =
+              a.sku.toLowerCase() === currentSearchTerm.toLowerCase();
+            const bExactMatch =
+              b.sku.toLowerCase() === currentSearchTerm.toLowerCase();
+            if (aExactMatch && !bExactMatch) return -1;
+            if (!aExactMatch && bExactMatch) return 1;
+          } else {
+            const aTitle = a.title.toLowerCase();
+            const bTitle = b.title.toLowerCase();
+            const searchTermLower = currentSearchTerm.toLowerCase();
+            const aExactMatch = aTitle === searchTermLower;
+            const bExactMatch = bTitle === searchTermLower;
+            if (aExactMatch && !bExactMatch) return -1;
+            if (!aExactMatch && bExactMatch) return 1;
+          }
           return 0;
         });
 
+      console.log("Filtered and sorted products:", filteredAndSortedProducts);
       setProducts(filteredAndSortedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
       setIsSearching(false);
     }
-  }, [searchTerm]);
+  }, [searchTerm, searchType, externalSku]);
 
+  // Effect for handling SKU changes from external input
   useEffect(() => {
-    setIsDebouncing(true);
-    const debounce = setTimeout(() => {
-      setIsDebouncing(false);
+    if (externalSku && externalSku.length >= 3) {
+      setSearchType("sku");
+      setOpen(true); // Open the popover when searching by SKU
       fetchProducts();
-    }, 300);
+    }
+  }, [externalSku, fetchProducts]);
 
-    return () => {
-      clearTimeout(debounce);
-    };
+  // Effect for handling name search changes
+  useEffect(() => {
+    if (searchTerm && searchType === "name") {
+      setIsDebouncing(true);
+      const debounce = setTimeout(() => {
+        setIsDebouncing(false);
+        fetchProducts();
+      }, 300);
+
+      return () => clearTimeout(debounce);
+    }
   }, [searchTerm, fetchProducts]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          {value
-            ? products.find((product) => product?.title == value)?.title
-            : "Select shoe..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput
-            placeholder="Search shoe..."
-            value={searchTerm}
-            onValueChange={setSearchTerm}
-          />
-          <CommandList>
-            {isDebouncing || isSearching ? (
-              <CommandItem disabled>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Searching for shoes...
-              </CommandItem>
-            ) : searchTerm.length > 0 ? (
-              <CommandGroup>
-                {products.length > 0 ? (
-                  products.map((product) => (
-                    <CommandItem
-                      key={product.id}
-                      value={product.title}
-                      onSelect={(currentValue) => {
-                        setValue(currentValue === value ? "" : currentValue);
-                        setShoeImage(product.image);
-                        setSku(product.sku);
-                        setBrand(product.brand);
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value === product.title ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {product.title}
-                    </CommandItem>
-                  ))
-                ) : (
-                  <CommandEmpty>No products found.</CommandEmpty>
-                )}
-              </CommandGroup>
-            ) : null}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div className="space-y-4">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between"
+          >
+            {value
+              ? products.find((product) => product?.title === value)?.title
+              : "Select shoe..."}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-full p-0">
+          <Command>
+            <CommandInput
+              placeholder="Search shoe..."
+              value={searchTerm}
+              onValueChange={(newValue) => {
+                setSearchTerm(newValue);
+                setSearchType("name");
+              }}
+            />
+            <CommandList>
+              {isDebouncing || isSearching ? (
+                <CommandItem>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Searching for shoes...
+                </CommandItem>
+              ) : searchTerm.length > 0 || externalSku.length > 0 ? (
+                <CommandGroup>
+                  {products.length > 0 ? (
+                    products.map((product) => (
+                      <CommandItem
+                        key={product.id}
+                        value={product.title}
+                        onSelect={(currentValue) => {
+                          console.log("Selected product:", product);
+                          setValue(currentValue === value ? "" : currentValue);
+                          setShoeImage(product.image);
+                          setSku(product.sku);
+                          setBrand(product.brand);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === product.title
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {product.title} - {product.sku}
+                      </CommandItem>
+                    ))
+                  ) : (
+                    <CommandEmpty>No products found.</CommandEmpty>
+                  )}
+                </CommandGroup>
+              ) : null}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
 
@@ -369,6 +428,7 @@ export default function CreateProductDashboard() {
                       setShoeImage={handleSetShoeImage}
                       setSku={setSku}
                       setBrand={setBrand}
+                      externalSku={sku}
                     />
                   </div>
                   <div className="space-y-2">
